@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#100c1b">
-<meta name="hex-rush-build" content="19">
+<meta name="hex-rush-build" content="20">
 <title>HEX RUSH — GRUNDO</title>
 <style>
 :root{color-scheme:dark;--bg:#100c1b;--panel:#181225;--ink:#fff3e6;--muted:#b5a6c3;--line:#392948;--acid:#f6fc73;--mono:"Courier New",monospace;--display:"Arial Black",Arial,sans-serif}
@@ -169,6 +169,21 @@ html:not(.in-game) .overlay{padding-top:66px}
 .player-row input:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .player-row button{min-height:38px;padding:8px 10px}
 @media(max-width:610px) and (max-height:700px){.dialog h2{font-size:27px}.dialog:has(.choices:not([hidden])) p{margin:6px 0 9px}.choices{margin-bottom:10px}.choices button{min-height:60px}.level-picker{margin-bottom:8px}.player-row{margin-bottom:9px}}
+.board-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.board-tabs button[aria-pressed="true"]{border-color:var(--acid);color:var(--acid)}
+.board-part{display:grid;gap:10px;min-height:0}
+.board-part[hidden]{display:none}
+.stat-totals{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0}
+.stat-totals div{padding:8px;border:1px solid var(--line);background:#130d1d}
+.stat-totals dt{color:var(--muted);font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.stat-totals dd{margin:4px 0 0;color:var(--acid);font:700 17px var(--mono)}
+.stat-table{max-height:40dvh;overflow:auto;overscroll-behavior:contain}
+.stat-table table{width:100%;border-collapse:collapse;font:12px var(--mono);font-variant-numeric:tabular-nums}
+.stat-table th,.stat-table td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right}
+.stat-table thead th{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.04em;position:sticky;top:0;background:var(--panel)}
+.stat-table thead th:first-child{text-align:left}
+.stat-table tbody th{text-align:left;color:var(--ink);font-weight:400;font-family:system-ui,sans-serif;font-size:13px}
+.stat-table td{color:var(--acid)}
 .board-note{margin:0;color:var(--muted);font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .board-list{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:56dvh;overflow-y:auto;overscroll-behavior:contain}
 .board-list[hidden],#board-empty[hidden]{display:none}
@@ -208,7 +223,7 @@ html:not(.in-game) .overlay{padding-top:66px}
 <button data-mode="run" aria-pressed="true"><canvas width="33" height="30" aria-hidden="true"></canvas>FUTÓ<small>Könnyebb</small></button>
 <button data-mode="bike" aria-pressed="false"><canvas width="33" height="30" aria-hidden="true"></canvas>BRINGÁS<small>Gyorsabb</small></button>
 </div>
-<div class="player-row" id="player-row"><input id="player-name" type="text" maxlength="12" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="Játékos neve" aria-label="Játékos neve"><button id="board-open" type="button">Ranglista</button></div>
+<div class="player-row" id="player-row"><input id="player-name" type="text" maxlength="12" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="Játékos neve" aria-label="Játékos neve"><button id="board-open" type="button">Eredmények</button></div>
 <button class="primary" id="continue">Játék indítása</button><button id="mode-menu" hidden>Vissza a főmenübe</button></div></div>
 </section>
 <dialog class="settings-sheet" id="settings" aria-labelledby="settings-title">
@@ -234,10 +249,18 @@ html:not(.in-game) .overlay{padding-top:66px}
 </dialog>
 <dialog class="settings-sheet" id="board" aria-labelledby="board-title">
 <div class="panel">
-<div class="settings-title"><h2 id="board-title">Ranglista</h2><button id="board-close" aria-label="Ranglista bezárása" autofocus>✕</button></div>
+<div class="settings-title"><h2 id="board-title">Eredmények</h2><button id="board-close" aria-label="Eredmények bezárása" autofocus>✕</button></div>
+<div class="board-tabs" role="group" aria-label="Nézet"><button type="button" data-board-tab="scores" aria-pressed="true">Ranglista</button><button type="button" data-board-tab="stats" aria-pressed="false">Statisztika</button></div>
+<div id="board-scores" class="board-part">
 <p class="board-note">Végtelen mód · ezen az eszközön</p>
 <ol class="board-list" id="board-list"></ol>
 <p id="board-empty">Még nincs eredmény. Válaszd a VÉGTELEN módot, és fuss egyet!</p>
+</div>
+<div id="board-stats" class="board-part" hidden>
+<p class="board-note">Minden menet · ezen az eszközön</p>
+<dl class="stat-totals"><div><dt>Megtett táv</dt><dd id="stat-meters"></dd></div><div><dt>Tallér</dt><dd id="stat-coins"></dd></div><div><dt>Csúcssebesség</dt><dd id="stat-speed"></dd></div><div><dt>Leesés</dt><dd id="stat-falls"></dd></div></dl>
+<div class="stat-table"><table><thead><tr><th scope="col">Karakter</th><th scope="col">Átugrottad</th><th scope="col">Lézer</th><th scope="col">EMP</th><th scope="col">Kiütött</th></tr></thead><tbody id="stat-rows"></tbody></table></div>
+</div>
 </div>
 </dialog>
 </main>
@@ -346,13 +369,58 @@ const stages = [
     pickups:[[12,1,"heart"],[28,0,"emp"],[68,1,"pulse"],[92,1,"double"],[112,1,"heart"],[155,2,"emp"]],
     glitchTiles:[[33,2,1],[69,3,2],[110,3,1],[160,2,2]],
     obstacles:[[24,1,"bus"],[50,1,"courier"],[61,2,"drone"],[73,0,"bus"],[100,2,"courier"],
-      [116,1,"bus"],[143,0,"drone"],[164,1,"bus"],[185,1,"courier"]]}
+      [116,1,"bus"],[143,0,"drone"],[164,1,"bus"],[185,1,"courier"]]},
+  ...[["Kutyafuttató","dog",21.2,25],["Babakocsi-korzó","stroller",21.6,330],["Nyugdíjas-roham","grandma",22,285],
+      ["Futárcsúcs","courier",22.4,170],["Buszsáv","bus",22.8,210]]
+    .map(([name, theme, speed, hue]) => ({name, theme, speed, hue, gaps:[], narrows:[], pads:[], pickups:[[12,1,"heart"]], obstacles:[]}))
 ];
+// Every stage is longer than the one before. Stages 11-15 were shorter than stage 10 once, so they get
+// more track after their own; stages 16-20 are made only of these blocks.
+const stageLengths = [69, 98, 132, 151, 181, 188, 200, 218, 229, 255, 265, 276, 287, 298, 309, 320, 331, 342, 353, 364];
+// Kinds an extended stage keeps meeting, and the theme of a stage if it has one.
+const stageThemes = {10:"beggar", 11:"drone"};
+const stageMixes = {12:["courier","football"], 13:["courier","drone"], 14:["bus","beggar","courier"]};
+const themeLabels = {dog:"kutyák", stroller:"babakocsik", grandma:"nagyik", beggar:"kéregetők", drone:"drónok", courier:"futárok", bus:"buszok", football:"focisták"};
+// A 36-row block: a narrowing (rows 0-5), an obstacle (6), a boost pad every other block (11-13),
+// a hole (16-20), an item (23-26) and, at row 28, the theme character twice side by side or one
+// other character. The rows between leave room to land from one jump before the next is needed.
+function addBlocks(stage, index, from, to) {
+  const roll = (salt) => {
+    const value = Math.sin((index * 977 + salt) * 12.9898) * 43758.5453;
+    return value - Math.floor(value);
+  };
+  const theme = stage.theme ?? stageThemes[index];
+  const mix = stageMixes[index] ?? [theme];
+  const empUseful = ["drone","courier","bus"].includes(theme ?? mix[0]);
+  for (let block = from, n = 0; block + 36 <= to - 4; block += 36, n++) {
+    const pick = (salt, count) => Math.floor(roll(n * 31 + salt) * count);
+    const kind = (salt) => theme && n % 3 !== 2 ? theme : mix[pick(salt, mix.length)];
+    stage.narrows.push([block, 6, n % 2 ? 6 : 3]);
+    stage.obstacles.push([block + 6, pick(1, 3), kind(2)]);
+    if (n % 2) stage.pads.push([block + 11, pick(3, 3)]);
+    stage.gaps.push([block + 16, 5]);
+    const itemRow = [23, 24, 25, 26].map(row => block + row).find(row => row % 16 < 5 || row % 16 > 7);
+    const item = ["heart", "double", empUseful ? "emp" : "pulse", null][n % 4];
+    if (item) stage.pickups.push([itemRow, 1, item]);
+    if (theme) {
+      const free = pick(4, 3);
+      for (const lane of [0, 1, 2]) if (lane !== free) stage.obstacles.push([block + 28, lane, theme]);
+    } else {
+      stage.obstacles.push([block + 28, pick(5, 3), kind(6)]);
+    }
+  }
+}
+stages.forEach((stage, index) => {
+  const from = stage.length ? stage.length + 2 : 20;
+  stage.length = stageLengths[index];
+  stage.theme ??= stageThemes[index];
+  if (index >= 10) addBlocks(stage, index, from, stage.length);
+});
 const rowSize = 1.5, laneSize = Math.sqrt(3);
 const hex = [[0,-1],[laneSize/2,-.5],[laneSize/2,.5],[0,1],[-laneSize/2,.5],[-laneSize/2,-.5]];
 const profiles = {
-  run: {label: "Futó", pace: .78, boost: 1.68, jumps: [4.6, 6.15, 7.65, 9.4, 9.75, 10, 10.1, 11.45, 11.6, 11.75, 10.8, 11.2, 10.8, 11.15, 11.85]},
-  bike: {label: "Bringás", pace: 1.13, boost: 1.78, jumps: [4.85, 6.4, 7.95, 9.65, 10, 10.2, 10.3, 11.7, 11.85, 12, 11.1, 11.5, 11.05, 11.5, 12.05]}
+  run: {label: "Futó", pace: .78, boost: 1.68, jumps: [4.6, 6.15, 7.65, 9.4, 9.75, 10, 10.1, 11.45, 11.6, 11.75, 10.8, 11.2, 10.8, 11.15, 11.85, 11.9, 12, 12.1, 12.2, 12.3]},
+  bike: {label: "Bringás", pace: 1.13, boost: 1.78, jumps: [4.85, 6.4, 7.95, 9.65, 10, 10.2, 10.3, 11.7, 11.85, 12, 11.1, 11.5, 11.05, 11.5, 12.05, 12.15, 12.25, 12.35, 12.45, 12.55]}
 };
 const edgeGrace = .11;
 const contactMargin = .16;
@@ -370,7 +438,7 @@ const stageList = stages.map((stage, index) => {
   const item = document.createElement("li");
   const number = document.createElement("b");
   number.textContent = String(index + 1).padStart(2, "0");
-  item.append(number, stage.name);
+  item.append(number, stage.name + (stage.theme ? " · " + themeLabels[stage.theme] : ""));
   find("stages").append(item);
   return item;
 });
@@ -763,6 +831,7 @@ function openBoard() {
   }));
   boardList.hidden = scores.length === 0;
   find("board-empty").hidden = scores.length > 0;
+  showBoardTab("scores");
   board.showModal();
 }
 nameInput.value = playerName;
@@ -779,6 +848,62 @@ nameInput.addEventListener("change", () => {
   nameInput.value = playerName;
 });
 find("board-open").addEventListener("click", openBoard);
+
+// Lifetime numbers of this browser: who was jumped, lasered, EMP-ed, who ended a run, falls, coins,
+// distance and the best speed. Kept with the name and the board.
+const statKinds = ["dog","grandma","stroller","beggar","football","courier","drone","bus"];
+const statNames = {dog:"Kutya", grandma:"Nagyi", stroller:"Babakocsi", beggar:"Kéregető", football:"Focista", courier:"Futár", drone:"Drón", bus:"BKK busz"};
+const statGroups = ["jumped","laser","emp","deaths"];
+const empKinds = new Set(["courier","drone","bus"]);
+function freshStats() {
+  const stats = {falls:0, coins:0, meters:0, topSpeed:0};
+  for (const group of statGroups) stats[group] = Object.fromEntries(statKinds.map(kind => [kind, 0]));
+  return stats;
+}
+let stats = freshStats();
+try {
+  const saved = JSON.parse(localStorage.getItem("hex-rush-stats"));
+  const count = (value) => Number.isFinite(value) && value >= 0 ? value : 0;
+  if (saved && typeof saved === "object") {
+    for (const key of ["falls","coins","meters","topSpeed"]) stats[key] = count(saved[key]);
+    for (const group of statGroups) for (const kind of statKinds) stats[group][kind] = Math.floor(count(saved[group]?.[kind]));
+  }
+} catch {}
+function countStat(group, kind) {
+  if (kind in stats[group]) stats[group][kind]++;
+}
+function saveStats() {
+  try {localStorage.setItem("hex-rush-stats", JSON.stringify(stats));} catch {}
+}
+const statNumber = new Intl.NumberFormat("hu-HU", {maximumFractionDigits:1});
+function renderStats() {
+  const set = (id, text) => { find(id).textContent = text; };
+  set("stat-meters", stats.meters >= 1000 ? statNumber.format(stats.meters / 1000) + " km" : Math.floor(stats.meters) + " m");
+  set("stat-coins", endlessDistanceFormat.format(stats.coins));
+  set("stat-speed", stats.topSpeed + " km/h");
+  set("stat-falls", endlessDistanceFormat.format(stats.falls));
+  find("stat-rows").replaceChildren(...statKinds.map(kind => {
+    const row = document.createElement("tr");
+    const cell = (tag, content) => {
+      const element = document.createElement(tag);
+      element.textContent = content;
+      return element;
+    };
+    row.append(cell("th", statNames[kind]), cell("td", stats.jumped[kind]), cell("td", stats.laser[kind]),
+      cell("td", empKinds.has(kind) ? stats.emp[kind] : "–"), cell("td", stats.deaths[kind]));
+    return row;
+  }));
+}
+function showBoardTab(tab) {
+  for (const button of document.querySelectorAll("[data-board-tab]")) button.setAttribute("aria-pressed", String(button.dataset.boardTab === tab));
+  find("board-scores").hidden = tab !== "scores";
+  find("board-stats").hidden = tab !== "stats";
+  if (tab === "stats") {
+    saveStats();
+    renderStats();
+  }
+}
+for (const button of document.querySelectorAll("[data-board-tab]")) button.addEventListener("click", () => showBoardTab(button.dataset.boardTab));
 find("board-close").addEventListener("click", () => board.close());
 
 const healthHud = find("health-hud"), gearHud = find("gear-hud");
@@ -889,6 +1014,7 @@ function useGear() {
     if (hit) {
       const [, col, kind] = hit.obstacle;
       clearedEnemies.add(hit.obstacle);
+      countStat("laser", kind);
       laserImpacts.push({x:hit.pose.x, z:beamTarget, kind, left:.72});
       showReaction(kind, col);
       effect(machine(kind) ? "pulseHit" : "scorch");
@@ -903,11 +1029,12 @@ function useGear() {
   gear = null;
   refreshEquipment();
 }
-function takeHit() {
+function takeHit(kind) {
   if (invulnerable > 0) return;
   health--;
   refreshEquipment();
   showLifePop("break");
+  if (health === 0 && kind) countStat("deaths", kind);
   if (health === 0) endRun("Elfogyott az életed!", "Térj ki az akadályok elől, vagy ugorj át rajtuk.");
   else invulnerable = 1.25;
   effect("breakHeart");
@@ -1048,7 +1175,7 @@ function refreshLevelPicker() {
   for (let index = 0; index <= Math.min(highestCleared + 1, stages.length - 1); index++) {
     const option = document.createElement("option");
     option.value = String(index);
-    option.textContent = (index + 1) + ". " + stages[index].name + (index <= highestCleared ? " ✓" : "");
+    option.textContent = (index + 1) + ". " + stages[index].name + (stages[index].theme ? " (" + themeLabels[stages[index].theme] + ")" : "") + (index <= highestCleared ? " ✓" : "");
     levelSelect.append(option);
   }
   levelSelect.value = selected && Number(selected) <= highestCleared + 1 ? selected : "0";
@@ -1115,6 +1242,7 @@ function reset(nextLevel) {
 }
 function show(nextState, title, description, label) {
   state = nextState;
+  saveStats();
   swipePoints.clear();
   reaction.hidden = true;
   reactionTime = 0;
@@ -1337,6 +1465,10 @@ window.addEventListener("keydown", (event) => {
   if (bound === "jump") state === "playing" ? jump() : startAction();
   if (bound === "pause") activate();
 });
+window.addEventListener("pagehide", saveStats);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) saveStats();
+});
 window.addEventListener("blur", () => {
   audioWasInterrupted = true;
   if (state === "playing") show("paused", "Szünet", "A pálya innen folytatódik.", "Folytatás");
@@ -1372,6 +1504,7 @@ function updateCoins(previousDistance) {
       if (cell.col !== coinColumn(stage, row, cell.side) || Math.abs(playerX() - cell.x) > laneSize * .39) continue;
       collectedCoins.add(row);
       coinTotal++;
+      stats.coins++;
       coinsReadout.textContent = String(coinTotal);
       effect("coin");
       break;
@@ -1409,13 +1542,17 @@ function updateCourseEvents(stage, previousDistance, previousAir) {
       if (Math.abs(playerX() - contactX(stage, z, col, side, kind)) > obstacleReach(kind)) continue;
       const crossing = (z - previousDistance) / (distance - previousDistance);
       const height = jumpHeight(previousAir + (air - previousAir) * crossing);
-      if (enemy(kind) && kind !== "beggar" && empTime > 0) continue;
+      if (enemy(kind) && kind !== "beggar" && empTime > 0) {
+        countStat("emp", kind);
+        continue;
+      }
       if (height < obstacleHeight[kind]) {
-        takeHit();
+        takeHit(kind);
         if (state !== "playing") return;
         continue;
       }
       chargeBoost();
+      countStat("jumped", kind);
       effect("clear");
       if (kind === "courier") showReaction(kind, col, "És a borravaló??");
       else if (kind !== "drone" && kind !== "football") showReaction(kind, col);
@@ -1505,6 +1642,7 @@ function update(delta) {
   const previousDistance = distance, previousAir = air;
   const advance = speed * delta;
   distance += advance;
+  stats.meters += advance * 1.5;
   movementTime += delta;
   air = Math.max(0, air - advance);
   if (air === 0) dropping = false;
@@ -1524,14 +1662,15 @@ function update(delta) {
   if (row >= stage.length) {
     const firstClear = level > highestCleared;
     saveClear(level);
-    if (level === stages.length - 1) show("won", "Célba értél!", "Mind a tizenöt pályát teljesítetted.", "Új játék");
-    else show("clear", "Pálya teljesítve", stages[level + 1].name + " következik.", "Következő pálya");
+    if (level === stages.length - 1) show("won", "Célba értél!", "Mind a " + stages.length + " pályát teljesítetted.", "Új játék");
+    else show("clear", "Pálya teljesítve", stages[level + 1].name + " következik." + (stages[level + 1].theme ? " Itt sok a " + themeLabels[stages[level + 1].theme] + " közül." : ""), "Következő pálya");
     if (firstClear) effect("unlock");
     action.focus({preventScroll: true});
     return;
   }
   if (unsupportedTime > edgeGrace) {
     state = "falling";
+    stats.falls++;
     air = 0;
     boostRemaining = boostGlow = boostBurst = 0;
     reactionTime = 0;
@@ -1582,7 +1721,12 @@ const colors = [
   ["#100c30","#3c3376","#a4f8ff","#39275d","#1d183c"],
   ["#181235","#5b4180","#f7c9fb","#3a2a5e","#251b44"],
   ["#0b2637","#378781","#c2f2c5","#274759","#143541"],
-  ["#1e1631","#66336e","#ff8ef1","#481b4f","#271635"]
+  ["#1e1631","#66336e","#ff8ef1","#481b4f","#271635"],
+  ["#2a160f","#8a4a22","#ffc27a","#5a2f1c","#2e1a14"],
+  ["#2a0f22","#8c2e63","#ff9fd0","#5a1f45","#2c1226"],
+  ["#1a1030","#5b3a8c","#d8b4ff","#3a2660","#20163a"],
+  ["#0c2426","#1f7a70","#9ff5dc","#1f4f4a","#102b2c"],
+  ["#0d1a33","#1f5aa8","#8fd3ff","#1d3a66","#11203d"]
 ];
 function scene(horizon, camera) {
   const palette = endless ? Math.floor(rowsAt(distance) / endlessRows) % colors.length : level;
@@ -2367,7 +2511,9 @@ function frame(now) {
     delta -= step;
   }
   const stage = courseAt();
-  speedText.nodeValue = String(Math.round(speed * 5.4)).padStart(2, "0") + " ";
+  const kmh = Math.round(speed * 5.4);
+  speedText.nodeValue = String(kmh).padStart(2, "0") + " ";
+  if (state === "playing" && kmh > stats.topSpeed) stats.topSpeed = kmh;
   refreshBoost();
   speedReadout.toggleAttribute("data-boost", (boostRemaining > 0 || padTime > 0) && state === "playing");
   if (endless) find("counter").textContent = endlessDistanceFormat.format(Math.floor(distance * 1.5)) + " m";

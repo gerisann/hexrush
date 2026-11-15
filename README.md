@@ -1,7 +1,7 @@
 # HEX RUSH
 
 A GRUNDO Arcade játéka: hatszögpályás ügyességi futó. Ugorj át a hiányzó
-hatszögeken, kerüld ki az akadályokat, gyűjtsd a tallérokat — tizenöt pályán
+hatszögeken, kerüld ki az akadályokat, gyűjtsd a tallérokat — húsz pályán
 vagy végtelen módban, futóval vagy bringással.
 
 **Játék:** <https://gerisann.github.io/hexrush/>
@@ -17,7 +17,7 @@ vagy végtelen módban, futóval vagy bringással.
 
 A billentyűk a beállításokban (fogaskerék) átállíthatók. A végtelen mód
 eredményei névvel a ranglistára kerülnek, amelyet a böngésző ezen az eszközön
-őriz.
+őriz. Ugyanott a statisztika: kit hányszor ugrottál át, lőttél le, ki ütött ki.
 
 Ez a repó csak a közzétett játékot tartalmazza: egyetlen `index.html`, külső
 függőség nélkül.
