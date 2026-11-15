@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#100c1b">
-<meta name="hex-rush-build" content="17">
+<meta name="hex-rush-build" content="18">
 <title>HEX RUSH — GRUNDO</title>
 <style>
 :root{color-scheme:dark;--bg:#100c1b;--panel:#181225;--ink:#fff3e6;--muted:#b5a6c3;--line:#392948;--acid:#f6fc73;--mono:"Courier New",monospace;--display:"Arial Black",Arial,sans-serif}
@@ -17,7 +17,7 @@ header{display:flex;align-items:center;justify-content:space-between;border-bott
 header span:last-child{color:var(--muted);font:700 11px var(--mono);letter-spacing:.15em}
 h1{font:900 italic clamp(49px,9vw,108px)/.88 var(--display);letter-spacing:-.082em;margin:29px 0 22px}
 h1 em{font-style:inherit;color:var(--acid);text-shadow:4px 4px #cd426e}
-.stage{position:relative;overflow:hidden;min-width:0;min-height:490px;border:1px solid #70507c;background:#1c102a;isolation:isolate}
+.stage{position:relative;overflow:hidden;min-width:0;min-height:540px;border:1px solid #70507c;background:#1c102a;isolation:isolate}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 3px,#0c061833 3px 4px);z-index:1}
 .hud{position:absolute;inset:14px 14px auto;z-index:2;display:flex;justify-content:space-between;gap:12px;pointer-events:none}
@@ -26,7 +26,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .readout strong{font-size:18px;color:var(--acid);letter-spacing:0}
 .overlay{position:absolute;z-index:3;inset:0;display:grid;place-items:center;background:#120a1a8c;padding:18px}
 .overlay[hidden]{display:none}
-.dialog{background:#191124f2;border:1px solid #9a648a;padding:22px;max-width:350px;width:100%;box-shadow:6px 6px #100a19}
+.dialog{background:#191124f2;border:1px solid #9a648a;padding:22px;max-width:350px;width:100%;max-height:100%;overflow:auto;box-shadow:6px 6px #100a19}
 .dialog h2{margin:0;font:900 italic 32px/1 var(--display);text-transform:uppercase}
 .dialog p{color:var(--muted);margin:10px 0 16px}
 .panel{background:var(--panel);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:17px}
@@ -62,21 +62,27 @@ button:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .choices button[aria-pressed="true"]{border-color:var(--acid);color:var(--acid)}
 .primary{border:0;background:var(--acid);color:#1a1325;width:100%;font:900 13px var(--mono);text-transform:uppercase;min-height:43px;box-shadow:3px 3px #9e9937}
 .primary:hover{background:#ffffad}
-.keys{display:grid;gap:7px;margin:0;margin-top:auto}
-.keys div{display:flex;align-items:center;justify-content:space-between;gap:6px;color:var(--muted);font-size:11px}
-.keys dt,.keys dd{margin:0}
+.keys{display:grid;gap:6px;margin:0}
+.key-row{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px}
+.key-row button{min-width:78px;min-height:34px;padding:4px 8px}
+.key-row button[data-listening]{border-color:var(--acid);color:var(--acid)}
+.key-note{margin:2px 0;color:var(--muted);font-size:12px}
+.key-note[data-warning]{color:#ff9fb8}
 kbd{font:700 10px var(--mono);color:var(--ink);padding:3px 5px;background:#2b2039;border:1px solid #544365}
-@media(max-width:610px){main{width:calc(100% - 28px);padding:18px 0 0}.stage{min-height:clamp(310px,65svh,530px)}h1{margin:20px 0 17px}}
+@media(max-width:610px){main{width:calc(100% - 28px);padding:18px 0 0}.stage{min-height:clamp(330px,78svh,620px)}h1{margin:20px 0 17px}}
 html.in-game,html.in-game body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 html.in-game body{position:fixed;inset:0}
 .in-game main{position:fixed;inset:0;width:100%;height:100%;margin:0;padding:0}
 .in-game header,.in-game h1{display:none}
 .in-game .stage{width:100%;height:100%;min-height:0;border:0}
 .hud{z-index:4;inset:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) auto max(10px,env(safe-area-inset-left))}
-.hud-right{min-width:0}
+.hud-right{min-width:0;margin-left:auto}
+.hud .readout{display:none}
+.in-game .hud .readout{display:flex}
+html:not(.in-game) .overlay{padding-top:66px}
 .settings-trigger{width:44px;min-height:44px;align-self:start;padding:0;z-index:1;pointer-events:auto;font:24px/1 Arial,sans-serif;background:#1c1129e8;border-color:#795a88}
 .settings-sheet{width:min(390px,calc(100% - 24px));max-height:calc(100% - 24px);margin:auto;padding:0;border:0;background:transparent;color:var(--ink);overscroll-behavior:contain}
-.settings-sheet .stages{max-height:38dvh;overflow-y:auto;overscroll-behavior:contain}
+.settings-sheet .stages{max-height:26dvh;overflow-y:auto;overscroll-behavior:contain}
 .settings-sheet::backdrop{background:#100818bd}
 .settings-sheet .panel{gap:13px}
 .settings-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -89,21 +95,29 @@ html.in-game body{position:fixed;inset:0}
   .keys{display:none}
   .swipe-help{display:block;margin:0;color:var(--muted);font-size:13px}
 }
-.in-game .boost-meter{display:block;position:absolute;z-index:2;left:50%;bottom:max(14px,env(safe-area-inset-bottom));width:min(55%,238px);transform:translateX(-50%);padding:7px 10px 9px;background:#151025ec;color:#ded5eb;border:1px solid #795a88;pointer-events:none}
-.boost-heading{display:flex;justify-content:space-between;gap:6px;align-items:center;font:700 10px var(--mono);letter-spacing:.05em}
-.boost-heading span:last-child{color:#fff5d0}
-.boost-track{height:8px;background:#392c4d;margin-top:5px;overflow:hidden;position:relative}
-.boost-fill{width:0;height:100%;background:linear-gradient(90deg,#a956f5,#f8fa78)}
-.boost-meter[data-active] .boost-fill{background:linear-gradient(90deg,#3cf0ff,#f8fa78)}
-.boost-meter[data-full]{border-color:var(--acid);box-shadow:0 0 14px #f6fc7380}
-.boost-meter[data-full] .boost-track::after{content:"";position:absolute;inset:0;width:42%;background:linear-gradient(90deg,transparent,#fff,transparent);animation:boost-sweep .9s ease-out both}
-@keyframes boost-sweep{from{transform:translateX(-100%)}to{transform:translateX(245%)}}
-@media(prefers-reduced-motion:reduce){.boost-meter[data-full] .boost-track::after{animation:none;display:none}}
+.in-game .boost-meter{display:flex;flex-direction:column;align-items:center;gap:6px;position:absolute;z-index:2;right:max(10px,env(safe-area-inset-right));top:calc(max(10px,env(safe-area-inset-top)) + 66px);min-width:62px;padding:7px 8px 6px;background:#151025ec;border:2px solid #795a88;box-shadow:3px 3px 0 #100a19;color:#ded5eb;font:700 10px/1 var(--mono);letter-spacing:.06em;pointer-events:none;--px:3px}
+.boost-value{color:#fff5d0}
+.boost-cells{display:flex;flex-direction:column;align-items:center;gap:calc(var(--px)*2);padding:var(--px) 0}
+.boost-cells i{position:relative;display:block;width:calc(var(--px)*var(--w));height:calc(var(--px)*var(--h));background:var(--off);box-shadow:0 0 0 var(--px) #0f0a1a}
+.boost-cells b{position:absolute;inset:auto 0 0;height:0;background:linear-gradient(90deg,#fff9 0 var(--px),transparent var(--px)),repeating-linear-gradient(0deg,var(--on) 0 var(--px),var(--dim) var(--px) calc(var(--px)*2))}
+.boost-cells [data-cell="1"]{--w:8;--h:4;--glow:2;--on:#a45cf2;--dim:#8747d6;--off:#2c1f45}
+.boost-cells [data-cell="2"]{--w:11;--h:6;--glow:3;--on:#3fe6ff;--dim:#27c3e6;--off:#16384a}
+.boost-cells [data-cell="3"]{--w:14;--h:8;--glow:5;--on:#f6fc73;--dim:#dfe655;--off:#3c3d1f}
+.boost-cells i[data-full]{box-shadow:0 0 0 var(--px) #0f0a1a,0 0 calc(var(--px)*var(--glow)) var(--px) var(--on)}
+.boost-meter[data-full]{border-color:var(--acid)}
+.boost-meter[data-full] .boost-value{color:var(--acid);animation:boost-blink .5s steps(2) infinite}
+.boost-meter[data-active]{border-color:#3fe6ff}
+.boost-meter[data-active] .boost-cells b{animation:boost-burn .16s steps(2) infinite}
+@keyframes boost-blink{50%{opacity:.35}}
+@keyframes boost-burn{50%{filter:brightness(1.45)}}
+@media(prefers-reduced-motion:reduce){.boost-meter[data-full] .boost-value,.boost-meter[data-active] .boost-cells b{animation:none}}
+@media(min-width:900px) and (min-height:600px){.in-game .boost-meter{--px:5px;font-size:13px;top:calc(max(10px,env(safe-area-inset-top)) + 72px)}}
 @media(max-width:370px){.hud{gap:5px}.readout{padding:7px 6px}.readout strong{font-size:15px}.hud-right{gap:4px}}
 #track{touch-action:none}
 .reaction{position:absolute;z-index:2;top:49%;width:min(43%,180px);pointer-events:none}
 .reaction[data-side="left"]{left:0}
 .reaction[data-side="right"]{right:0}
+@media(orientation:landscape) and (max-height:500px){.in-game .reaction[data-side="right"]{right:78px}}
 .reaction[hidden]{display:none}
 .reaction canvas{position:static;width:100%;height:auto;display:block;image-rendering:pixelated}
 .reaction span{position:absolute;z-index:1;bottom:86%;max-width:96%;color:#22132c;background:#fff2e3;padding:6px 9px;text-align:center;box-shadow:3px 3px #b76daf;font:700 clamp(12px,2vw,16px)/1.2 var(--mono)}
@@ -114,10 +128,21 @@ html.in-game body{position:fixed;inset:0}
 .audio-options button{min-height:44px}.audio-options button[aria-pressed="true"]{color:var(--acid);border-color:#8a874d}
 .equipment-hud{display:none;position:absolute;left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 61px);z-index:2;gap:5px;flex-direction:column;align-items:start;pointer-events:none}
 .in-game .equipment-hud{display:flex}
-#health-hud,#gear-hud,#jump-hud{padding:3px 7px;background:#1c1129ed;border:1px solid #795a88}
+#health-hud{padding:3px 7px;background:#1c1129ed;border:1px solid #795a88}
 #health-hud{font:700 18px/1 system-ui,sans-serif;letter-spacing:.1em;color:#ff8db0}
-#gear-hud{font:700 11px var(--mono);color:var(--acid)}
-#jump-hud{font:700 11px var(--mono);color:#9dff7a}
+.slot{display:flex;align-items:center;gap:8px;padding:3px 10px 3px 3px;background:#1c1129f2;border:2px solid var(--tone,#795a88);box-shadow:3px 3px 0 #100a19;color:var(--tone,#b5a6c3);transform-origin:left center}
+.slot canvas{position:static;flex:none;width:36px;height:36px;image-rendering:pixelated;background:#100c1b}
+.slot b{display:block;font:700 13px/1 var(--mono);letter-spacing:.05em;white-space:nowrap}
+.slot small{display:block;margin-top:5px;color:#d9cfe6;font:700 10px/1 var(--mono);white-space:nowrap}
+.slot kbd{font-size:9px;padding:1px 4px}
+.slot[data-empty]{padding:2px;border-width:1px;box-shadow:none;opacity:.55}
+.slot[data-empty] canvas{width:27px;height:27px}
+.slot[data-empty] .slot-text{display:none}
+.slot[data-pop]{animation:slot-pop .5s steps(8) both}
+@keyframes slot-pop{0%{transform:scale(1.45);filter:brightness(2.4)}55%{transform:scale(.95);filter:brightness(1.3)}to{transform:none;filter:none}}
+.hint-touch{display:none}
+@media(pointer:coarse){.hint-touch{display:inline}.hint-key{display:none}}
+@media(min-width:900px) and (min-height:600px){.slot canvas{width:54px;height:54px}.slot[data-empty] canvas{width:36px;height:36px}.slot b{font-size:17px}.slot small{font-size:12px}.slot kbd{font-size:11px}}
 .level-picker{display:grid;gap:4px;margin:0 0 10px;color:var(--muted);font:700 11px var(--mono)}
 .level-picker[hidden]{display:none}
 .level-picker select{min-width:0;width:100%;min-height:38px;padding:4px 8px;border:1px solid #715580;background:#251a33;color:var(--ink);font:700 13px system-ui,sans-serif}
@@ -136,15 +161,32 @@ html.in-game body{position:fixed;inset:0}
 .heart-break[data-burst] i:last-child{animation:heart-break-right .75s ease-out both}
 @keyframes heart-break-left{0%{transform:scale(.55);opacity:1}14%{transform:scale(1.14)}26%{transform:none}74%{opacity:1}to{transform:translate(calc(var(--unit,3px)*-9),calc(var(--unit,3px)*11)) rotate(-30deg);opacity:0}}
 @keyframes heart-break-right{0%{transform:scale(.55);opacity:1}14%{transform:scale(1.14)}26%{transform:none}74%{opacity:1}to{transform:translate(calc(var(--unit,3px)*9),calc(var(--unit,3px)*11)) rotate(30deg);opacity:0}}
-.one-up b{display:block;white-space:nowrap;font:900 italic calc(var(--unit,3px)*7)/1 var(--display);letter-spacing:.02em;color:var(--acid);text-shadow:calc(var(--unit,3px)*.67) calc(var(--unit,3px)*.67) 0 #cd426e,0 0 calc(var(--unit,3px)*2.5) #100c1b,0 0 2px #100c1b}
-.one-up[data-burst] b{animation:one-up-rise 1s ease-out both}
+.pickup-pop b{display:block;white-space:nowrap;font:900 italic calc(var(--unit,3px)*var(--pop-size,7))/1 var(--display);letter-spacing:.02em;color:var(--pop,var(--acid));text-shadow:calc(var(--unit,3px)*.67) calc(var(--unit,3px)*.67) 0 var(--pop-shade,#cd426e),0 0 calc(var(--unit,3px)*2.5) #100c1b,0 0 2px #100c1b}
+.pickup-pop[data-burst] b{animation:one-up-rise 1s ease-out both}
 @keyframes one-up-rise{0%{transform:translateY(70%) scale(.5);opacity:0}16%{transform:translateY(0) scale(1.2);opacity:1}30%{transform:none}68%{opacity:1}to{transform:translateY(-120%);opacity:0}}
 @media(prefers-reduced-motion:reduce){
-  .heart-break[data-burst] i,.one-up[data-burst] b{animation:none}
+  .heart-break[data-burst] i,.pickup-pop[data-burst] b,.slot[data-pop]{animation:none}
   .heart-break i:first-child{transform:translate(calc(var(--unit,3px)*-1.5),0) rotate(-9deg)}
   .heart-break i:last-child{transform:translate(calc(var(--unit,3px)*1.5),0) rotate(9deg)}
 }
-@media(max-height:430px){.level-picker{margin-bottom:5px}.level-picker select{min-height:30px}.in-game .dialog{max-height:calc(100dvh - 36px);overflow:auto}}
+.player-row{display:flex;gap:8px;margin:0 0 12px}
+.player-row[hidden]{display:none}
+.player-row input{flex:1;min-width:0;min-height:38px;padding:4px 8px;border:1px solid #715580;background:#251a33;color:var(--ink);font:700 14px system-ui,sans-serif}
+.player-row input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.player-row button{min-height:38px;padding:8px 10px}
+@media(max-width:610px) and (max-height:700px){.dialog h2{font-size:27px}.dialog:has(.choices:not([hidden])) p{margin:6px 0 9px}.choices{margin-bottom:10px}.choices button{min-height:60px}.level-picker{margin-bottom:8px}.player-row{margin-bottom:9px}}
+.board-note{margin:0;color:var(--muted);font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.board-list{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:56dvh;overflow-y:auto;overscroll-behavior:contain}
+.board-list[hidden],#board-empty[hidden]{display:none}
+.board-list li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px 8px;align-items:baseline;padding:7px 8px;border:1px solid transparent;font-size:14px}
+.board-list li b{font:700 12px var(--mono);color:var(--muted)}
+.board-list li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-list li strong{font:700 15px var(--mono);color:var(--acid)}
+.board-list li small{grid-column:2/4;color:var(--muted);font:11px var(--mono)}
+.board-list li:nth-child(-n+3) b{color:var(--acid)}
+.board-list li[data-latest]{background:#2c1c3c;border-color:var(--acid)}
+#board-empty{margin:0;color:var(--muted)}
+@media(max-height:430px){.level-picker{margin-bottom:5px}.level-picker select{min-height:30px}.player-row{margin-bottom:7px}.player-row input,.player-row button{min-height:30px}}
 </style>
 </head>
 <body>
@@ -154,12 +196,13 @@ html.in-game body{position:fixed;inset:0}
 <section class="stage" aria-label="Játéktér">
 <canvas id="track" tabindex="-1" aria-label="Perspektivikus hatszögpálya és a játékos karaktere"></canvas>
 <div class="hud"><div class="readout" id="speed-readout">SEBESSÉG<strong id="speed">00 <small>km/h</small></strong></div><div class="hud-right"><div class="readout coin-readout">TALLÉR<strong id="coins">0</strong></div><div class="readout"><span id="counter-label">PÁLYA</span><strong id="counter">01 / 15</strong></div><button class="settings-trigger" id="settings-trigger" aria-label="Beállítások" aria-haspopup="dialog" aria-controls="settings">⚙</button></div></div>
-<div class="equipment-hud"><span id="health-hud" role="img" aria-label="2 élet a háromból"><i class="pixel-heart" data-full></i><i class="pixel-heart" data-full></i><i class="pixel-heart"></i></span><span id="gear-hud" hidden></span><span id="jump-hud" hidden>DUPLA UGRÁS</span></div>
+<div class="equipment-hud"><span id="health-hud" role="img" aria-label="2 élet a háromból"><i class="pixel-heart" data-full></i><i class="pixel-heart" data-full></i><i class="pixel-heart"></i></span><div class="slot" id="gear-slot" data-empty><canvas width="9" height="9" aria-hidden="true"></canvas><span class="slot-text"><b id="gear-hud"></b><small><span class="hint-touch">koppints</span><kbd class="hint-key" id="gear-key"></kbd></small></span></div><div class="slot" id="jump-slot" data-empty><canvas width="9" height="9" aria-hidden="true"></canvas><span class="slot-text"><b id="jump-hud">DUPLA UGRÁS</b><small><span class="hint-touch">levegőben húzd fel</span><span class="hint-key">levegőben <kbd id="jump-key"></kbd></span></small></span></div></div>
 <div class="life-pop heart-break" id="heart-break" hidden aria-hidden="true"><i><b class="pixel-heart"></b></i><i><b class="pixel-heart"></b></i></div>
-<div class="life-pop one-up" id="one-up" hidden aria-hidden="true"><b>1 UP</b></div>
-<div class="boost-meter" id="boost-meter">
-  <div class="boost-heading"><span>BOOST</span><span id="boost-label">ÜRES</span></div>
-  <div class="boost-track" id="boost-track" role="meter" aria-label="Boost töltés" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="boost-fill" id="boost-fill"></div></div>
+<div class="life-pop pickup-pop" id="pickup-pop" hidden aria-hidden="true"><b></b></div>
+<div class="boost-meter" id="boost-meter" role="meter" aria-label="Boost töltés" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+  <span class="boost-value" id="boost-label">ÜRES</span>
+  <div class="boost-cells" aria-hidden="true"><i data-cell="3"><b></b></i><i data-cell="2"><b></b></i><i data-cell="1"><b></b></i></div>
+  <span aria-hidden="true">BOOST</span>
 </div>
 <div class="reaction" id="reaction" hidden role="status"><span id="reaction-text"></span><canvas id="reaction-portrait" width="96" height="76" aria-hidden="true"></canvas></div>
 <div class="overlay" id="overlay"><div class="dialog"><h2 id="message"></h2><p id="detail"></p>
@@ -171,6 +214,7 @@ html.in-game body{position:fixed;inset:0}
 <button data-mode="run" aria-pressed="true"><canvas width="33" height="30" aria-hidden="true"></canvas>FUTÓ<small>Könnyebb</small></button>
 <button data-mode="bike" aria-pressed="false"><canvas width="33" height="30" aria-hidden="true"></canvas>BRINGÁS<small>Gyorsabb</small></button>
 </div>
+<div class="player-row" id="player-row"><input id="player-name" type="text" maxlength="12" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="Játékos neve" aria-label="Játékos neve"><button id="board-open" type="button">Ranglista</button></div>
 <button class="primary" id="continue">Játék indítása</button><button id="mode-menu" hidden>Vissza a főmenübe</button></div></div>
 </section>
 <dialog class="settings-sheet" id="settings" aria-labelledby="settings-title">
@@ -180,10 +224,26 @@ html.in-game body{position:fixed;inset:0}
 <div id="endless-settings" hidden><h2 class="label">Végtelen</h2><p>Méterenként 1 pont, talléronként 10 pont.</p></div>
 <div><h2 class="label">Karakter</h2><p id="mode-label">Futó</p></div>
 <div class="audio-options" role="group" aria-label="Hangbeállítások"><button id="music" aria-pressed="true">Zene: be</button><button id="sfx" aria-pressed="true">Hangok: be</button></div>
-<dl class="keys"><div><dt>Sávváltás</dt><dd><kbd>←</kbd> <kbd>→</kbd></dd></div><div><dt>Ugrás</dt><dd><kbd>SPACE</kbd></dd></div><div><dt>Dupla ugrás a levegőben</dt><dd><kbd>SPACE</kbd></dd></div><div><dt>Boost indítása / leállítása</dt><dd><kbd>CTRL</kbd></dd></div><div><dt>Eszköz használata</dt><dd><kbd>F</kbd></dd></div><div><dt>Szünet</dt><dd><kbd>ESC</kbd></dd></div></dl>
+<div class="keys" id="keys" role="group" aria-labelledby="keys-title"><h2 class="label" id="keys-title">Gombkiosztás</h2>
+<div class="key-row"><span>Sáv balra</span><button type="button" data-key="left"></button></div>
+<div class="key-row"><span>Sáv jobbra</span><button type="button" data-key="right"></button></div>
+<div class="key-row"><span>Ugrás</span><button type="button" data-key="jump"></button></div>
+<div class="key-row"><span>Boost indítása / leállítása</span><button type="button" data-key="boost"></button></div>
+<div class="key-row"><span>Eszköz használata</span><button type="button" data-key="use"></button></div>
+<div class="key-row"><span>Szünet</span><button type="button" data-key="pause"></button></div>
+<p class="key-note" id="key-note" role="status">Kattints egy gombra, majd nyomd meg az újat. Dupla ugrás: az ugrás gombja még egyszer, a levegőben.</p>
+<button type="button" id="keys-reset">Alapértelmezett gombok</button></div>
 <p class="boost-help">Az átugrott akadályok töltik a boost sávot.</p>
 <button class="settings-exit" id="settings-exit" hidden>Menet feladása és vissza a főmenübe</button>
 <p class="swipe-help">Húzd az ujjad oldalra a sávváltáshoz, felfelé az ugráshoz. Ha van nálad dupla ugrás, a levegőben húzd újra felfelé. Húzd lefelé az ujjad a boost indításához vagy leállításához. Koppints a pályára a felvett eszköz használatához.</p>
+</div>
+</dialog>
+<dialog class="settings-sheet" id="board" aria-labelledby="board-title">
+<div class="panel">
+<div class="settings-title"><h2 id="board-title">Ranglista</h2><button id="board-close" aria-label="Ranglista bezárása" autofocus>✕</button></div>
+<p class="board-note">Végtelen mód · ezen az eszközön</p>
+<ol class="board-list" id="board-list"></ol>
+<p id="board-empty">Még nincs eredmény. Válaszd a VÉGTELEN módot, és fuss egyet!</p>
 </div>
 </dialog>
 </main>
@@ -484,7 +544,7 @@ function effect(name) {
     pickup:["square",550,1050,.14,.05], heal:["triangle",470,1320,.24,.067], breakHeart:["square",270,81,.3,.065],
     pulse:["square",920,155,.22,.06], scorch:["sawtooth",410,75,.25,.047], pulseHit:["sawtooth",170,39,.34,.075], emp:["triangle",760,85,.41,.055],
     crate:["triangle",145,91,.13,.038], football:["sine",255,105,.1,.061], drone:["triangle",430,535,.17,.035],
-    courier:["square",270,430,.15,.028], arm:["sawtooth",155,226,.24,.031], glitch:["square",270,86,.18,.034],
+    courier:["triangle",1865,1760,.13,.04], bell:["triangle",1865,1760,.16,.04,.14], arm:["sawtooth",155,226,.24,.031], glitch:["square",270,86,.18,.034],
     unlock:["triangle",440,1046,.28,.047],
     bark:["sawtooth",320,155,.14,.061], coin:["square",830,1475,.115,.036], clear:["triangle",740,1060,.12,.052], hit:["sawtooth",160,44,.23,.043],
     run:["triangle",245,112,.07,.054], bike:["sawtooth",218,142,.064,.041]
@@ -537,7 +597,7 @@ for (const [key, label] of [["music","Zene"],["sfx","Hangok"]]) {
 }
 
 const obstacleHeight = {dog:.46, grandma:1.12, stroller:1.08, crate:1.05, drone:1.24, football:.42, courier:1.05, arm:1.15};
-const reactionLines = {dog:"Vau vau!", stroller:"Tsssss, alszik a gyerek!", grandma:"A k%$&a anyádat!", crate:"Hé, törékeny áru!", drone:"Hiba 404. Drón nem található.", football:"Les volt!", courier:"A csomagod késni fog!", arm:"Karbantartás miatt zárva!"};
+const reactionLines = {dog:"Vau vau!", stroller:"Tsssss, alszik a gyerek!", grandma:"A k%$&a anyádat!", crate:"Hé, törékeny áru!", drone:"Hiba 404. Drón nem található.", football:"Les volt!", courier:"A rendelésed késni fog!", arm:"Karbantartás miatt zárva!"};
 const reactionDuration = 2.4;
 const barkTimes = [.46, .84];
 const padLength = 3;
@@ -551,8 +611,9 @@ const collectedCoins = new Set();
 let padTime = 0, reactionTime = 0;
 let hitObstacles = new Set(), usedPads = new Set();
 const boostPerJump = 1.125, boostCapacity = boostPerJump * 3;
-const boostMeter = find("boost-meter"), boostFill = find("boost-fill");
-const boostTrack = find("boost-track"), boostLabel = find("boost-label");
+const boostMeter = find("boost-meter"), boostLabel = find("boost-label");
+// The gauge's three cells, from the first charge (bottom) to the third (top).
+const boostCells = [1, 2, 3].map((cell) => boostMeter.querySelector('[data-cell="' + cell + '"]'));
 let shownBoostPercent = -1;
 let boostCharge = 0, boostAtStart = 0, boostRemaining = 0, boostGlow = 0, boostBurst = 0;
 
@@ -583,12 +644,17 @@ function refreshBoost() {
   const label = active ? charge.toFixed(1) + " mp" : charge === boostCapacity ? "MAX" : charge ? percent + "%" : "ÜRES";
   if (boostLabel.textContent !== label) {
     boostLabel.textContent = label;
-    boostTrack.setAttribute("aria-valuetext", active ? "Aktív, hátralévő idő: " + label : label);
+    boostMeter.setAttribute("aria-valuetext", active ? "Aktív, hátralévő idő: " + label : label);
   }
   if (shownBoostPercent !== percent) {
     shownBoostPercent = percent;
-    boostTrack.setAttribute("aria-valuenow", String(percent));
-    boostFill.style.width = percent + "%";
+    boostMeter.setAttribute("aria-valuenow", String(percent));
+    boostCells.forEach((cell, index) => {
+      // Each cell holds the charge of one cleared obstacle.
+      const fill = Math.max(0, Math.min(1, charge / boostPerJump - index));
+      cell.firstChild.style.height = Math.round(fill * 100) + "%";
+      cell.toggleAttribute("data-full", fill === 1);
+    });
   }
 }
 
@@ -643,14 +709,79 @@ function endlessResults() {
   const score = meters + coinTotal * 10;
   return endlessDistanceFormat.format(meters) + " m · " + coinTotal + " tallér · " + endlessDistanceFormat.format(score) + " pont";
 }
-const healthHud = find("health-hud"), gearHud = find("gear-hud"), jumpHud = find("jump-hud");
+// The player's name and the high-score table of the endless mode. Both live in this browser only.
+const nameInput = find("player-name"), board = find("board"), boardList = find("board-list");
+const boardSize = 10, boardDate = new Intl.DateTimeFormat("hu-HU", {month:"short", day:"numeric"});
+let playerName = "", scores = [], latestScore = null;
+function cleanName(text) {
+  return String(text).replace(/\s+/g, " ").trim().slice(0, 12);
+}
+try {
+  playerName = cleanName(localStorage.getItem("hex-rush-name") ?? "");
+  const saved = JSON.parse(localStorage.getItem("hex-rush-scores"));
+  if (Array.isArray(saved)) {
+    scores = saved
+      .filter(entry => entry && Number.isFinite(entry.score) && Number.isFinite(entry.meters) && Number.isFinite(entry.coins))
+      .map(entry => ({name:cleanName(entry.name ?? ""), score:entry.score, meters:entry.meters, coins:entry.coins, mode:entry.mode === "bike" ? "bike" : "run", at:Number(entry.at) || 0}))
+      .sort((a, b) => b.score - a.score).slice(0, 50);
+  }
+} catch {}
+function saveScores() {
+  try {localStorage.setItem("hex-rush-scores", JSON.stringify(scores));} catch {}
+}
+// Adds a finished endless run and returns its place, 0 when it is not kept.
+function recordScore(meters, coins) {
+  const entry = {name:playerName, score:meters + coins * 10, meters, coins, mode, at:Date.now()};
+  if (entry.score <= 0) return 0;
+  const lower = scores.findIndex(other => other.score < entry.score);
+  scores.splice(lower < 0 ? scores.length : lower, 0, entry);
+  scores.length = Math.min(scores.length, 50);
+  latestScore = scores.includes(entry) ? entry : null;
+  saveScores();
+  return scores.indexOf(entry) + 1;
+}
+function openBoard() {
+  boardList.replaceChildren(...scores.slice(0, boardSize).map((entry, index) => {
+    const row = document.createElement("li");
+    const cell = (tag, content) => {
+      const element = document.createElement(tag);
+      element.textContent = content;
+      return element;
+    };
+    row.append(cell("b", (index + 1) + "."), cell("span", entry.name || "Névtelen"), cell("strong", endlessDistanceFormat.format(entry.score)),
+      cell("small", endlessDistanceFormat.format(entry.meters) + " m · " + entry.coins + " tallér · " + profiles[entry.mode].label.toLowerCase() + (entry.at ? " · " + boardDate.format(entry.at) : "")));
+    row.toggleAttribute("data-latest", entry === latestScore);
+    return row;
+  }));
+  boardList.hidden = scores.length === 0;
+  find("board-empty").hidden = scores.length > 0;
+  board.showModal();
+}
+nameInput.value = playerName;
+nameInput.addEventListener("input", () => {
+  playerName = cleanName(nameInput.value);
+  try {localStorage.setItem("hex-rush-name", playerName);} catch {}
+  // Typed right after a run, the name goes onto that run's entry too.
+  if (latestScore && state === "lost") {
+    latestScore.name = playerName;
+    saveScores();
+  }
+});
+nameInput.addEventListener("change", () => {
+  nameInput.value = playerName;
+});
+find("board-open").addEventListener("click", openBoard);
+find("board-close").addEventListener("click", () => board.close());
+
+const healthHud = find("health-hud"), gearHud = find("gear-hud");
+const gearSlot = find("gear-slot"), jumpSlot = find("jump-slot");
 const pickupLabels = {pulse:"LÉZER", emp:"EMP"};
 const pickupColors = {heart:"#ff689d", pulse:"#fcce70", emp:"#72ecfb", double:"#9dff7a"};
 // The weapon (gear) and the double jump are separate slots: holding one never blocks or replaces the other.
 let health = 2, gear = null, doubleJump = false, invulnerable = 0, empTime = 0, gearFlash = 0, beamX = 0, beamTarget = null;
-// Heart effects that play right above the character's head: the "1 UP" and the breaking heart.
-const lifePops = {up:find("one-up"), break:find("heart-break")};
-const lifePopTime = {up:1000, break:750};
+// Effects that play right above the character's head: the breaking heart, and a word for what was just picked up.
+const lifePops = {text:find("pickup-pop"), break:find("heart-break")};
+const lifePopTime = {text:1000, break:750};
 const playfield = canvas.parentElement;
 let lifePop = null, lifePopTimer, lifePopUnit = 0;
 function clearLifePop() {
@@ -658,9 +789,16 @@ function clearLifePop() {
   if (lifePop) lifePop.hidden = true;
   lifePop = null;
 }
-function showLifePop(kind) {
+function showLifePop(kind, text, tone) {
   clearLifePop();
   lifePop = lifePops[kind];
+  if (kind === "text") {
+    // "1 UP" keeps its own look; an item's name takes the item's colour; a refusal ("TELE") is plain.
+    lifePop.firstChild.textContent = text;
+    lifePop.style.setProperty("--pop", tone ? pickupColors[tone] ?? "#e1cbe8" : "");
+    lifePop.style.setProperty("--pop-shade", tone ? "#2d1646" : "");
+    lifePop.style.setProperty("--pop-size", tone ? "5.5" : "");
+  }
   lifePop.removeAttribute("data-burst");
   lifePop.hidden = false;
   void lifePop.offsetWidth;
@@ -680,15 +818,39 @@ const pickupEffectDuration = .36;
 let airJumpEffect = null;
 const airJumpEffectDuration = .3;
 
+// Machines blow up under the laser and are drawn as machines. The courier is a person on an e-bike:
+// like the machines he swerves into a lane and an EMP stops him, but he is drawn and reacts as a person.
+function machine(kind) {
+  return kind === "crate" || kind === "drone" || kind === "arm";
+}
 function enemy(kind) {
-  return kind === "crate" || kind === "drone" || kind === "courier" || kind === "arm";
+  return machine(kind) || kind === "courier";
 }
 function refreshEquipment() {
   [...healthHud.children].forEach((heart, index) => heart.toggleAttribute("data-full", index < health));
   healthHud.setAttribute("aria-label", health + " élet a háromból");
-  gearHud.hidden = gear === null;
+  drawSlot(gearSlot, gear, slotGhost);
   if (gear) gearHud.textContent = pickupLabels[gear];
-  jumpHud.hidden = !doubleJump;
+  drawSlot(jumpSlot, doubleJump ? "double" : null, pickupGlyphs.double);
+}
+// A held item fills its slot with a large icon in the item's colour; an empty slot shows a faint outline.
+const slotGhost = ["...#...","...#...",".......","##...##",".......","...#...","...#..."];
+function drawSlot(slot, kind, ghost) {
+  const context = slot.firstElementChild.getContext("2d");
+  const glyph = kind ? pickupGlyphs[kind] : ghost;
+  context.clearRect(0, 0, 9, 9);
+  glyph.forEach((row, y) => [...row].forEach((pixel, x) => {
+    if (pixel !== "#") return;
+    context.fillStyle = !kind ? "#6b5a7c" : (x + y) % 4 === 0 ? "#fffbd5" : pickupColors[kind];
+    context.fillRect(x + 1, y + 1 + (7 - glyph.length >> 1), 1, 1);
+  }));
+  slot.toggleAttribute("data-empty", !kind);
+  slot.style.setProperty("--tone", kind ? pickupColors[kind] : "");
+}
+function popSlot(slot) {
+  slot.removeAttribute("data-pop");
+  void slot.offsetWidth;
+  slot.setAttribute("data-pop", "");
 }
 // How far to the side of its own centre an obstacle still blocks the player.
 function obstacleReach(kind) {
@@ -720,7 +882,7 @@ function useGear() {
       clearedEnemies.add(hit.obstacle);
       laserImpacts.push({x:hit.pose.x, z:beamTarget, kind, left:.72});
       showReaction(kind, col);
-      effect(enemy(kind) ? "pulseHit" : "scorch");
+      effect(machine(kind) ? "pulseHit" : "scorch");
     } else {
       effect("pulse");
     }
@@ -752,15 +914,26 @@ function collectPickups(previousDistance) {
       const pickup = pickupAt(stage, row, cell.side, cell.col);
       if (!pickup || usedPickups.has(pickup) || Math.abs(playerX() - cell.x) > laneSize * .43) continue;
       const kind = pickup[2];
+      // Whatever happens is said above the head: what was taken, or why the item was left.
       if (kind === "heart") {
-        if (health === 3) continue;
+        if (health === 3) {
+          showLifePop("text", "TELE", "none");
+          continue;
+        }
         health++;
-        showLifePop("up");
+        showLifePop("text", "1 UP");
       } else if (kind === "double") {
-        if (doubleJump) continue;
+        if (doubleJump) {
+          showLifePop("text", "MÁR VAN", "none");
+          continue;
+        }
         doubleJump = true;
+        showLifePop("text", "+DUPLA UGRÁS", kind);
+        popSlot(jumpSlot);
       } else {
         gear = kind;
+        showLifePop("text", "+" + pickupLabels[kind], kind);
+        popSlot(gearSlot);
       }
       usedPickups.add(pickup);
       refreshEquipment();
@@ -770,7 +943,12 @@ function collectPickups(previousDistance) {
   }
 }
 function endRun(title, description) {
-  show("lost", title, endless ? endlessResults() : description, endless ? "Új végtelen menet" : "Újra ezen a pályán");
+  let detail = description;
+  if (endless) {
+    const place = recordScore(Math.floor(distance * 1.5), coinTotal);
+    detail = endlessResults() + (place === 1 ? " · új csúcs!" : place > 0 && place <= boardSize ? " · " + place + ". hely" : "");
+  }
+  show("lost", title, detail, endless ? "Új végtelen menet" : "Újra ezen a pályán");
   action.focus({preventScroll: true});
 }
 function routeData(stage, row, side) {
@@ -899,6 +1077,7 @@ function resetCourseEvents() {
   reaction.hidden = true;
 }
 function reset(nextLevel) {
+  latestScore = null;
   if (state !== "clear" || endless) {health = 2; gear = null; doubleJump = false;}
   refreshEquipment();
   if (endless) {
@@ -938,6 +1117,8 @@ function show(nextState, title, description, label) {
   find("course-choices").hidden = choices.hidden;
   find("mode-menu").hidden = nextState === "ready";
   levelPicker.hidden = endless || nextState !== "ready";
+  // The name and the board: before a run, and after an endless one, where the name still goes onto the result.
+  find("player-row").hidden = nextState !== "ready" && !(endless && nextState === "lost");
   overlay.hidden = false;
 }
 function activate() {
@@ -973,6 +1154,8 @@ settingsTrigger.addEventListener("click", () => {
   settings.showModal();
 });
 function closeSettings() {
+  listening = null;
+  refreshKeys();
   settings.close();
   if (!resumeAfterSettings) return;
   resumeAfterSettings = false;
@@ -987,6 +1170,8 @@ find("settings-exit").addEventListener("click", () => {
 });
 settings.addEventListener("cancel", (event) => {
   event.preventDefault();
+  // ESC pressed to bind it, or to back out of binding, must not also close the sheet.
+  if (listening || event.timeStamp - keyTakenAt < 300) return;
   closeSettings();
 });
 action.addEventListener("click", startAction);
@@ -1043,20 +1228,104 @@ modeButtons.forEach((button) => {
     modeButtons.forEach((option) => option.setAttribute("aria-pressed", String(option === button)));
   });
 });
+// Key bindings: every action has one key, chosen in the settings and kept in this browser.
+const keyDefaults = {left:["ArrowLeft","←"], right:["ArrowRight","→"], jump:["Space","SPACE"], boost:["ControlLeft","CTRL"], use:["KeyF","F"], pause:["Escape","ESC"]};
+const keyNames = {Space:"SPACE", Escape:"ESC", ArrowLeft:"←", ArrowRight:"→", ArrowUp:"↑", ArrowDown:"↓", ControlLeft:"CTRL", ShiftLeft:"SHIFT", AltLeft:"ALT", Backspace:"BKSP", Delete:"DEL"};
+// Keys the browser or the dialogs need for themselves.
+const reservedKey = /^(|Tab|Enter|NumpadEnter|CapsLock|ContextMenu|NumLock|ScrollLock|PrintScreen|Pause|(Meta|OS)(Left|Right)|F\d+)$/;
+const keyButtons = [...document.querySelectorAll("[data-key]")], keyNote = find("key-note");
+const keyHelp = keyNote.textContent;
+let keys = {}, listening = null, keyTakenAt = -Infinity;
+for (const action in keyDefaults) keys[action] = [...keyDefaults[action]];
+try {
+  const saved = JSON.parse(localStorage.getItem("hex-rush-keys"));
+  const seen = new Set();
+  const usable = saved && Object.keys(keyDefaults).every(action => {
+    const pair = saved[action];
+    if (!Array.isArray(pair) || typeof pair[0] !== "string" || typeof pair[1] !== "string" || !pair[1]) return false;
+    if (reservedKey.test(pair[0]) || seen.has(pair[0])) return false;
+    return seen.add(pair[0]);
+  });
+  if (usable) for (const action in keyDefaults) keys[action] = [saved[action][0], saved[action][1].slice(0, 8)];
+} catch {}
+// Left and right CTRL, SHIFT and ALT count as the same key.
+function keyCode(event) {
+  return event.code.replace(/^(Control|Shift|Alt)Right$/, "$1Left");
+}
+function keyLabel(event) {
+  const code = keyCode(event);
+  if (keyNames[code]) return keyNames[code];
+  if (code.startsWith("Numpad")) return ("NUM " + event.key).toUpperCase().slice(0, 8);
+  return (event.key.length === 1 ? event.key : code).toUpperCase().slice(0, 8);
+}
+function refreshKeys() {
+  for (const button of keyButtons) {
+    const waiting = button.dataset.key === listening;
+    button.textContent = waiting ? "nyomd meg…" : keys[button.dataset.key][1];
+    button.setAttribute("aria-label", button.previousElementSibling.textContent + ": " + button.textContent);
+    button.toggleAttribute("data-listening", waiting);
+  }
+  find("gear-key").textContent = keys.use[1];
+  find("jump-key").textContent = keys.jump[1];
+  keyNote.textContent = keyHelp;
+  keyNote.removeAttribute("data-warning");
+}
+function saveKeys() {
+  try {localStorage.setItem("hex-rush-keys", JSON.stringify(keys));} catch {}
+}
+for (const button of keyButtons) {
+  button.addEventListener("click", () => {
+    listening = listening === button.dataset.key ? null : button.dataset.key;
+    refreshKeys();
+  });
+}
+find("keys-reset").addEventListener("click", () => {
+  for (const action in keyDefaults) keys[action] = [...keyDefaults[action]];
+  listening = null;
+  saveKeys();
+  refreshKeys();
+});
+// While a binding waits for its key, the next key press belongs to it and to nothing else.
 window.addEventListener("keydown", (event) => {
-  if (settings.open) return;
-  if (!["ArrowLeft", "ArrowRight", "ControlLeft", "ControlRight", "KeyF", "Space", "Escape"].includes(event.code)) return;
-  if (event.code === "Space" && state !== "playing" && document.activeElement?.tagName === "BUTTON") return;
-  if (event.code === "Escape" && !["paused", "playing"].includes(state)) return;
+  if (!listening) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  if (event.repeat) return;
+  const code = keyCode(event);
+  if (reservedKey.test(code)) {
+    keyNote.textContent = "Ez a gomb nem használható, válassz másikat.";
+    keyNote.setAttribute("data-warning", "");
+    return;
+  }
+  // A key that already does something else swaps places with this one, so no action is left without a key.
+  const other = Object.keys(keys).find(action => keys[action][0] === code);
+  if (other && other !== listening) keys[other] = keys[listening];
+  keys[listening] = [code, keyLabel(event)];
+  listening = null;
+  keyTakenAt = event.timeStamp;
+  saveKeys();
+  refreshKeys();
+}, true);
+refreshKeys();
+window.addEventListener("keydown", (event) => {
+  if (settings.open || board.open) return;
+  // Typing a name or choosing a stage is not playing.
+  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) return;
+  const code = keyCode(event);
+  const bound = Object.keys(keys).find(action => keys[action][0] === code);
+  if (!bound) return;
+  // SPACE on a focused button presses that button.
+  if (code === "Space" && state !== "playing" && document.activeElement?.tagName === "BUTTON") return;
+  if (bound === "pause" && !["paused", "playing"].includes(state)) return;
   event.preventDefault();
   if (event.repeat) return;
   if (state === "playing" && audioContext?.state !== "running") unlockAudio();
-  if (event.code === "ArrowLeft") move(-1);
-  if (event.code === "ArrowRight") move(1);
-  if (event.key === "Control") toggleBoost();
-  if (event.code === "KeyF") useGear();
-  if (event.code === "Space") state === "playing" ? jump() : startAction();
-  if (event.code === "Escape") activate();
+  if (bound === "left") move(-1);
+  if (bound === "right") move(1);
+  if (bound === "boost") toggleBoost();
+  if (bound === "use") useGear();
+  if (bound === "jump") state === "playing" ? jump() : startAction();
+  if (bound === "pause") activate();
 });
 window.addEventListener("blur", () => {
   audioWasInterrupted = true;
@@ -1121,7 +1390,10 @@ function updateCourseEvents(stage, previousDistance, previousAir) {
       const z = meetingRow * rowSize;
       if (hitObstacles.has(obstacle) || clearedEnemies.has(obstacle)) continue;
       const cue = z - (kind === "football" ? 8.4 : 11);
-      if ((enemy(kind) || kind === "football") && previousDistance < cue && distance >= cue) effect(kind);
+      if ((enemy(kind) || kind === "football") && previousDistance < cue && distance >= cue) {
+        effect(kind);
+        if (kind === "courier") effect("bell");
+      }
       if (previousDistance >= z || distance < z) continue;
       hitObstacles.add(obstacle);
       if (Math.abs(playerX() - contactX(stage, z, col, side, kind)) > obstacleReach(kind)) continue;
@@ -1134,12 +1406,9 @@ function updateCourseEvents(stage, previousDistance, previousAir) {
         continue;
       }
       chargeBoost();
-      if (enemy(kind) || kind === "football") {
-        effect("clear");
-        continue;
-      }
-      showReaction(kind, col);
       effect("clear");
+      if (kind === "courier") showReaction(kind, col, "És a borravaló??");
+      else if (!machine(kind) && kind !== "football") showReaction(kind, col);
     }
   }
 }
@@ -1403,7 +1672,10 @@ function road(project, isMoving) {
       if (launch) {
         polygon([[-.5,-.18],[.5,-.18],[0,.35]].map(([dx,dz]) => project(x + dx, depth + dz, .025)), "#fff59e");
       }
-      if (pickup && !usedPickups.has(pickup)) drawPickup(project, x, depth, pickup[2]);
+      if (pickup && !usedPickups.has(pickup)) {
+        drawPickupTile(project, x, depth, points, pickup[2]);
+        drawPickup(project, x, depth, pickup[2]);
+      }
       if (col === coinCol && !collectedCoins.has(row)) {
         drawCoin(project, x, depth);
       }
@@ -1506,47 +1778,42 @@ const pickupGlyphs = {
 function pickupTurn(depth) {
   if (reducedMotion.matches) return 1;
   const turn = Math.cos(movementTime * 7 + depth * .12);
-  return (turn < 0 ? -1 : 1) * Math.max(.16, Math.abs(turn));
+  return (turn < 0 ? -1 : 1) * Math.max(.34, Math.abs(turn));
 }
-// Every item on the track is a bare glyph that spins around its upright axis, like the coins.
+// An item belongs to one tile, and the tile shows it: it takes the item's colour and carries a dark pad
+// with a rim in that colour, so the lane to be in is plain from far away.
+function drawPickupTile(project, x, depth, points, kind) {
+  const fog = ctx.globalAlpha;
+  ctx.globalAlpha = fog * (reducedMotion.matches ? .5 : .44 + Math.sin(movementTime * 6) * .14);
+  polygon(points, pickupColors[kind]);
+  ctx.globalAlpha = fog;
+  polygon(hex.map(([dx, dz]) => project(x + dx * .6, depth + dz * .6, .02)), "#100c1b99", pickupColors[kind], depth < 12 ? 2 : 1);
+}
+// The item itself is a bare glyph standing just above its tile, turning around its upright axis like the
+// coins. It is drawn to the scale of the road at its depth, so it never looks wider than its lane.
+const pickupCell = .15;
 function drawPickup(project, x, depth, kind) {
-  const phase = movementTime * 5 + depth * .14;
-  const bob = reducedMotion.matches ? 0 : Math.sin(phase) * .23;
-  const [cx, cy] = project(x, depth, .93 + bob);
-  const size = Math.max(6, Math.abs(project(x, depth, 1.52 + bob)[1] - cy));
-  const pulse = reducedMotion.matches ? 1 : 1 + Math.sin(phase * 1.6) * .11;
+  const [groundX, groundY] = project(x, depth);
+  const cell = Math.abs(project(x + 1, depth)[0] - groundX) * pickupCell;
   const glyph = pickupGlyphs[kind];
+  const hover = reducedMotion.matches ? 0 : Math.sin(movementTime * 5 + depth * .14) * .4;
+  ctx.fillStyle = "#0e0a20b0";
+  ctx.beginPath();
+  ctx.ellipse(groundX, groundY, cell * 3, cell, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(size * pulse * pickupTurn(depth) / 3, size * pulse / 3);
-  ctx.fillStyle = pickupColors[kind];
-  const spark = reducedMotion.matches ? 0 : Math.floor(movementTime * 8) % 4;
-  ctx.fillRect(-6 + (spark % 2) * 11, -6 + Math.floor(spark / 2) * 11, 1.3, 1.3);
-  glyph.forEach((row, y) => [...row].forEach((pixel, x) => {
+  ctx.translate(groundX, groundY - (glyph.length + 1.8 + hover) * cell);
+  ctx.scale(cell * pickupTurn(depth), cell);
+  glyph.forEach((row, y) => [...row].forEach((pixel, column) => {
     if (pixel !== "#") return;
     ctx.fillStyle = "#2d1646";
-    ctx.fillRect(x - 3.7, y - glyph.length / 2 - .2, 1.4, 1.4);
-    ctx.fillStyle = (x+y)%4 === 0 ? "#fffbd5" : pickupColors[kind];
-    ctx.fillRect(x - 3.5, y - glyph.length / 2, 1, 1);
+    ctx.fillRect(column - 3.7, y - .2, 1.4, 1.4);
+    ctx.fillStyle = (column + y) % 4 === 0 ? "#fffbd5" : pickupColors[kind];
+    ctx.fillRect(column - 3.5, y, 1, 1);
   }));
   ctx.restore();
 }
 function drawEnemySprite(kind, stunned, context = ctx) {
-  if (kind === "courier") {
-    context.fillStyle = "#202444";
-    context.fillRect(-8,-19,16,18);
-    context.fillStyle = "#68d8c4";
-    context.fillRect(-6,-18,12,6);
-    context.fillRect(-7,-10,14,7);
-    context.fillStyle = stunned ? "#7c879f" : "#fff398";
-    context.fillRect(-4,-16,8,2);
-    context.fillStyle = "#ad83db";
-    context.fillRect(-4,-9,8,4);
-    context.fillStyle = "#d3c9eb";
-    context.fillRect(-7,-3,4,3);
-    context.fillRect(3,-3,4,3);
-    return;
-  }
   if (kind === "arm") {
     context.fillStyle = "#28183d";
     context.fillRect(-20,-13,40,7);
@@ -1594,29 +1861,29 @@ function drawLaserImpacts(project) {
     const phase = 1 - left / .72;
     const [cx,cy] = project(x, depth, .68);
     const scale = Math.max(2.5, Math.min(14, Math.abs(project(x + .20, depth)[0] - cx)));
-    const machine = enemy(kind);
+    const blast = machine(kind);
     ctx.save();
     ctx.translate(Math.round(cx), Math.round(cy));
     ctx.scale(scale, scale);
     ctx.globalAlpha = 1 - phase;
-    if (machine && phase < .35) {
+    if (blast && phase < .35) {
       ctx.fillStyle = "#ff8947";
       ctx.fillRect(-1.3,-2.6,2.6,5.2);
       ctx.fillRect(-2.6,-1.3,5.2,2.6);
       ctx.fillStyle = "#fff4a6";
       ctx.fillRect(-.9,-.9,1.8,1.8);
-    } else if (!machine && phase < .56) {
+    } else if (!blast && phase < .56) {
       ctx.fillStyle = "#211b2a";
       ctx.fillRect(-.75,-2.6,1.5,1.4);
       ctx.fillRect(-1.15,-1.2,2.3,2.5);
       ctx.fillStyle = "#e96735";
       ctx.fillRect(-.45,-.4,.42,.42);
     }
-    const spread = reducedMotion.matches ? 2 : 1 + phase * (machine ? 5 : 3.1);
+    const spread = reducedMotion.matches ? 2 : 1 + phase * (blast ? 5 : 3.1);
     for (let i = 0; i < 16; i++) {
       const angle = i * Math.PI / 8;
-      ctx.fillStyle = machine ? ["#fff9a6","#f6a44a","#a858e6"][i%3] : ["#26202e","#725264","#ffa055"][i%3];
-      ctx.fillRect(Math.cos(angle)*spread,Math.sin(angle)*spread+phase*(machine ? .4 : 2.2),.55,.55);
+      ctx.fillStyle = blast ? ["#fff9a6","#f6a44a","#a858e6"][i%3] : ["#26202e","#725264","#ffa055"][i%3];
+      ctx.fillRect(Math.cos(angle)*spread,Math.sin(angle)*spread+phase*(blast ? .4 : 2.2),.55,.55);
     }
     ctx.restore();
   }
@@ -1687,7 +1954,7 @@ function drawCoin(project, x, depth) {
   ctx.fillRect(.1,-.45,.16,.87);
   ctx.restore();
 }
-function obstacleSprite(context, kind, phase, waving = false) {
+function obstacleSprite(context, kind, phase, waving = false, stalled = false) {
   const dark="#251835", skin="#ffbb9d", hair="#e7d5e9";
   function rect(x,y,w,h,color) {
     context.fillStyle = color;
@@ -1696,6 +1963,42 @@ function obstacleSprite(context, kind, phase, waving = false) {
   const step = Math.sin(phase) > 0 ? 1 : -1;
   if (kind === "dog") {
     dogSprite(context, phase, 0, false);
+    return;
+  }
+  if (kind === "courier") {
+    // A food courier on a bicycle, seen from the front: the big delivery box on his back, helmet,
+    // hands on the handlebar, the front wheel between his feet. An EMP kills the e-bike's light.
+    const pedal = Math.round(Math.sin(phase) * 1.5);
+    rect(-8,-30,16,17,"#1d7d74");
+    rect(-7,-29,14,15,stalled ? "#7c9a96" : "#2fc4b0");
+    rect(-2,-29,1,1,"#fff3e6");
+    rect(1,-29,1,1,"#fff3e6");
+    rect(-3,-27,6,1,"#fff3e6");
+    rect(-2,-26,4,1,"#fff3e6");
+    rect(-7,-19,14,1,"#1d7d74");
+    rect(-3,-22,6,6,"#c98a5e");
+    rect(-4,-24,8,3,"#ffe37c");
+    rect(-3,-25,6,1,"#fff6ca");
+    rect(-2,-20,1,1,dark);
+    rect(1,-20,1,1,dark);
+    rect(-1,-18,2,1,"#8c4f3a");
+    rect(-5,-16,10,8,"#f0563f");
+    rect(-4,-16,1,6,"#1d7d74");
+    rect(3,-16,1,6,"#1d7d74");
+    rect(-8,-15,3,5,"#b83a34");
+    rect(-8,-11,2,2,"#c98a5e");
+    if (!waving) {
+      rect(5,-15,3,5,"#b83a34");
+      rect(6,-11,2,2,"#c98a5e");
+    }
+    rect(-9,-10,18,1,"#d3c9eb");
+    rect(-1,-11,2,3,stalled ? "#566077" : "#fff398");
+    rect(-4,-8,3,4+pedal,dark);
+    rect(1,-8,3,4-pedal,dark);
+    rect(-5,-4+pedal,4,2,"#fff6ca");
+    rect(1,-4-pedal,4,2,"#fff6ca");
+    rect(-1,-8,2,8,"#16101f");
+    rect(0,-7,1,6,"#6e6790");
     return;
   }
   if (kind === "stroller") {
@@ -1757,31 +2060,33 @@ function dogSprite(context, phase, mouth, portraitPose) {
   rect(-2,-8,4,1+mouth,dark);
   if (mouth) rect(-1,-7,2,1,"#fa8a9f");
 }
+// Where the shoulder is, then the colours of the upper arm, the forearm and the hand.
+const waveLooks = {stroller:[4.3,-14,"#f69ac0","#efb3ce","#ffbb9d"], grandma:[5,-12.5,"#a154a4","#c17dbc","#ffbb9d"], courier:[5,-14.5,"#b83a34","#f0563f","#c98a5e"]};
 function drawWave(phase, kind) {
-  const mother = kind === "stroller";
+  const [shoulderX, shoulderY, sleeve, forearm, hand] = waveLooks[kind];
   portrait.save();
-  portrait.translate(mother ? 4.3 : 5, mother ? -14 : -12.5);
+  portrait.translate(shoulderX, shoulderY);
   portrait.rotate(-.55 + Math.sin(phase) * .08);
   portrait.fillStyle = "#2d1c35";
   portrait.fillRect(-.5, -1.5, 4.8, 3);
-  portrait.fillStyle = mother ? "#f69ac0" : "#a154a4";
+  portrait.fillStyle = sleeve;
   portrait.fillRect(-.3, -1, 4.5, 2.2);
   portrait.translate(3.6, 0);
   portrait.rotate(-1 + Math.sin(phase + .45) * .26);
-  portrait.fillStyle = mother ? "#efb3ce" : "#c17dbc";
+  portrait.fillStyle = forearm;
   portrait.fillRect(-.6, -1, 3.8, 2.2);
   portrait.translate(2.8, 0);
   portrait.rotate(Math.sin(phase + .9) * .32);
-  portrait.fillStyle = "#ffbb9d";
+  portrait.fillStyle = hand;
   portrait.fillRect(0, -1.25, 2.5, 2.5);
   portrait.fillRect(1, -1.85, 1.5, 3.1);
   portrait.restore();
 }
-function showReaction(kind, col) {
+function showReaction(kind, col, line = reactionLines[kind]) {
   reactionKind = kind;
   reactionSide = col === 1 ? (reactionSide === "left" ? "right" : "left") : col === 0 ? "left" : "right";
   reaction.dataset.side = reactionSide;
-  reactionText.textContent = reactionLines[kind];
+  reactionText.textContent = line;
   reactionTime = reactionDuration;
   renderReaction();
 }
@@ -1805,12 +2110,12 @@ function renderReaction() {
     portrait.scale(-1, 1);
   }
   const dog = reactionKind === "dog";
-  const machine = enemy(reactionKind);
-  portrait.translate(machine ? -2 : dog ? 1 : -2, machine ? 60 : dog ? 59 : 72);
+  const boxy = machine(reactionKind);
+  portrait.translate(boxy ? -2 : dog ? 1 : reactionKind === "courier" ? 6 : -2, boxy ? 60 : dog ? 59 : 72);
   portrait.rotate(.32 + (still ? 0 : (1 - eased) * .14));
-  const scale = dog ? 2.75 : 2.55;
+  const scale = dog ? 2.75 : reactionKind === "courier" ? 2.3 : 2.55;
   portrait.scale(scale, scale);
-  if (machine) {
+  if (boxy) {
     drawEnemySprite(reactionKind, false, portrait);
   } else if (reactionKind === "football") {
     portrait.fillStyle = "#e6fc86";
@@ -1903,14 +2208,14 @@ function drawObstacles(stage, project, foreground) {
       }
       const [screenX, screenY] = project(x, relative, lift);
       const focalScale = Math.abs(project(x+.6, relative)[0] - screenX) / .6;
-      const scale = Math.max(enemy(kind) ? 1.05 : .8, focalScale * (enemy(kind) ? .095 : kind === "dog" ? .087 : .063));
+      const scale = Math.max(machine(kind) ? 1.05 : .8, focalScale * (machine(kind) ? .095 : kind === "dog" ? .087 : kind === "courier" ? .07 : .063));
       const ground = [[-.52,-.15],[0,-.38],[.52,-.15],[.52,.15],[0,.38],[-.52,.15]];
       polygon(ground.map(([dx,dz]) => project(x+dx, relative+dz, .03)), "#17101acc", "#ffe3ac", 1.15);
       ctx.save();
       ctx.translate(Math.round(screenX), Math.round(screenY));
       ctx.scale(scale, scale);
-      if (enemy(kind)) drawEnemySprite(kind, empTime > 0);
-      else obstacleSprite(ctx, kind, movementTime * 16);
+      if (machine(kind)) drawEnemySprite(kind, empTime > 0);
+      else obstacleSprite(ctx, kind, movementTime * 16, false, empTime > 0);
       ctx.restore();
     }
   }

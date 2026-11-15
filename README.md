@@ -15,5 +15,9 @@ vagy végtelen módban, futóval vagy bringással.
 | Felvett eszköz (lézer, EMP) | `F` | koppintás |
 | Szünet | `ESC` | fogaskerék |
 
+A billentyűk a beállításokban (fogaskerék) átállíthatók. A végtelen mód
+eredményei névvel a ranglistára kerülnek, amelyet a böngésző ezen az eszközön
+őriz.
+
 Ez a repó csak a közzétett játékot tartalmazza: egyetlen `index.html`, külső
 függőség nélkül.
